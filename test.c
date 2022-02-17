@@ -1,4 +1,5 @@
 
+#define _NO_CRT_STDIO_INLINE
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>

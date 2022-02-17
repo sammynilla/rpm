@@ -19,27 +19,33 @@ rpm_size(const long width, const long height) {
   return height * (width * 3) + header;
 }
 
-/* static int*/
-/* digits_by_log10(unsigned long v) {*/
-/*   int r;*/
-/*   /* NOTE (sammynilla): Below are some notes from my reading:*/
-/*    * Conditions using integer division are slower than simple comparisons.*/
-/*    * This might seem a bit silly, but it's an obvious implementation.*/
-/*    */
-/*   r = (v >= 1000000000) ? 9 : (v >= 100000000) ? 8 : (v >= 10000000) ? 7 :*/
-/*       (v >= 1000000) ? 6 : (v >= 100000) ? 5 : (v >= 10000) ? 4 :*/
-/*       (v >= 1000) ? 3 : (v >= 100) ? 2 : (v >= 10) ? 1 : 0;*/
-
-/*   return r + 1;*/
-/* }*/
-
 static void 
 rpm_set(void *buf, long x, long y, unsigned long color) {
   enum { MAGIC_NUMBER = 3, SIZE_DATA = 11, MAX_VAL = 4 };
-  const int header = (MAGIC_NUMBER + (SIZE_DATA * 2) + MAX_VAL);
+  enum { MAX_DIGIT = 10, DIGIT_TO_ASCII = 48 };
   unsigned char *p = (unsigned char *)buf;
+  unsigned long width = 0;
 
-  p = p + header + y * (512 * 3) + x * 3;
+  // NOTE (sammynilla): We could just pass width as an argument to avoid this...
+  // CALCULATE WIDTH
+  {
+    p += MAGIC_NUMBER;
+    unsigned long mul = 1000000000;
+    int i;
+    for (i = 0; i < MAX_DIGIT; ++i) {
+      if (*p != '0') {
+        int val = ((int)*p) - DIGIT_TO_ASCII;
+        val *= mul;
+        width += val;
+      }
+      mul = (unsigned long)(mul * 0.1);
+      *p++;
+    }
+    *p++;
+  }
+
+  p += SIZE_DATA + MAX_VAL;
+  p += y * (width * 3) + x * 3;
   /* NOTE (sammynilla): RGB based format
    * RAWBITS ppm requires values from 0 to MAXVALS (255 in our implementation).
    */
@@ -68,7 +74,7 @@ rpm_init(void *buf, long width, long height) {
 
   // WIDTH,HEIGHT
   {
-    const char sep[2] = { ASCII_COMMA, ASCII_NEW_LINE };
+    const char separator[2] = { ASCII_COMMA, ASCII_NEW_LINE };
     unsigned char ascii[MAX_DIGIT];
     unsigned char *d;
     int i, j;
@@ -89,7 +95,7 @@ rpm_init(void *buf, long width, long height) {
       }
       d = ascii;
       while (*d) { *p++ = *d++; }
-      *p++ = sep[i];
+      *p++ = separator[i];
     }
   }
 
