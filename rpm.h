@@ -30,6 +30,7 @@ rpm_set(void *buf, long x, long y, unsigned long color) {
   p += MAGIC_NUMBER;
   // CALCULATE WIDTH
   for (; (((int)*p >= DIGIT_0) && ((int)*p <= DIGIT_9)); *p++) {
+    if ((int)*p == DIGIT_0) continue;
     int val = ((int)*p) - DIGIT_TO_ASCII;
     width = (width * 10) + val;
   }

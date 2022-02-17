@@ -4,11 +4,6 @@
 #include <stdint.h>
 #include <assert.h>
 #include "rpm.h"
-// NOTE (sammynilla): PPM image format specification taken from 'man ppm'
-// http://ailab.eecs.wsu.edu/wise/P1/PPM.html
-
-#define WIDTH 512L
-#define HEIGHT 512L
 
 uint32_t
 pack_colors(const uint8_t r, const uint8_t g, const uint8_t b) {
@@ -18,13 +13,14 @@ pack_colors(const uint8_t r, const uint8_t g, const uint8_t b) {
 
 int
 main(void) {
+  enum { WIDTH = 512L, HEIGHT = 512L };
+
   FILE *f;
   static char rpm[RPM_SIZE(WIDTH, HEIGHT)];
 
   rpm_init(rpm, WIDTH, HEIGHT);
 
-  // Overflow and bad size tests
-  // TODO (sammynilla): Discover what the max size of PPM can be.
+  /* TODO (sammynilla): Discover what the max size of PPM can be. */
   assert(rpm_size(0, 1) == 0);
 
   {
