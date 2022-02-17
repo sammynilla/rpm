@@ -2,8 +2,9 @@
 #ifndef RPM_H
 #define RPM_H
 
-// NOTE (sammynilla): PPM image format specification taken from 'man ppm'
-// http://ailab.eecs.wsu.edu/wise/P1/PPM.html
+/* NOTE (sammynilla): PPM image format specification taken from 'man ppm'
+ * http://ailab.eecs.wsu.edu/wise/P1/PPM.html
+ */
 
 #define RPM_SIZE(w, h) ((h) * ((w) * 3) + (3) + (10 + 1) + (10 + 1) + (4))
 
@@ -11,12 +12,12 @@ static unsigned long
 rpm_size(const long width, const long height) {
   enum { MAGIC_NUMBER = 3, SIZE_DATA = 11, MAX_VAL = 4 };
   const int header = (MAGIC_NUMBER + (SIZE_DATA * 2) + MAX_VAL);
-  // TODO (sammynilla): Add in value overflow sanitizing checks.
-  int query = (width < 1) || (height < 1); // avoid spectre mitigation warning.
+  /* TODO (sammynilla): Add in value overflow sanitizing checks. */
+  int query = (width < 1) || (height < 1); /* avoid spectre mitigation warning. */
   if (query)
-    return 0; // Illegal size
+    return 0; /* Illegal size */
 
-  return height * (width * 3) + header;
+  return (unsigned long)(height * (width * 3) + header);
 }
 
 static void 
@@ -52,12 +53,14 @@ rpm_set(void *buf, long x, long y, unsigned long color) {
  */
 static void
 rpm_init(void *buf, long width, long height) {
+  typedef unsigned char uchar;
   enum { 
     ASCII_0 = 0x30, ASCII_2 = 0x32, ASCII_5 = 0x35, ASCII_6 = 0x36,
     ASCII_P = 0x50, ASCII_COMMA = 0x2C, ASCII_NEW_LINE = 0x0A,
   };
   enum { BASE_MOD = 1, MAX_DIGIT = 10, DIGIT_TO_ASCII = 48 };
-  unsigned char *p = (unsigned char *)buf;
+
+  uchar *p = (uchar *)buf;
 
   // MAGIC NUMBER
   *p++ = ASCII_P;
@@ -66,14 +69,14 @@ rpm_init(void *buf, long width, long height) {
 
   // WIDTH,HEIGHT
   {
-    const char separator[2] = { ASCII_COMMA, ASCII_NEW_LINE };
-    unsigned char ascii[MAX_DIGIT];
-    unsigned char *d;
+    const uchar separator[2] = { ASCII_COMMA, ASCII_NEW_LINE };
+    uchar ascii[MAX_DIGIT];
+    uchar *d;
     int i, j;
     for (i = 0; i < 2; ++i) {
       unsigned long mod = BASE_MOD;
       unsigned long ret = 0;
-      unsigned long s = i ? height : width;
+      long s = i ? height : width;
       const int digit_count =
         (s >= 1000000000) ? 10 : (s >= 100000000) ? 9 : (s >= 10000000) ? 8 :
         (s >= 1000000) ? 7 : (s >= 100000) ? 6 : (s >= 10000) ? 5 :
@@ -83,7 +86,7 @@ rpm_init(void *buf, long width, long height) {
         s -= ret;
         mod *= 10;
         ret = s % mod;
-        ascii[MAX_DIGIT-(j+1)] = (char)(ret / (mod * 0.1)) + DIGIT_TO_ASCII;
+        ascii[MAX_DIGIT-(j+1)] = (uchar)((ret / (mod * 0.1)) + DIGIT_TO_ASCII);
       }
       d = ascii;
       while (*d) { *p++ = *d++; }
