@@ -19,19 +19,19 @@ rpm_size(const long width, const long height) {
   return height * (width * 3) + header;
 }
 
-static int
-digits_by_log10(unsigned long v) {
-  int r;
-  /* NOTE (sammynilla): Below are some notes from my reading:
-   * Conditions using integer division are slower than simple comparisons.
-   * This might seem a bit silly, but it's an obvious implementation.
-   */
-  r = (v >= 1000000000) ? 9 : (v >= 100000000) ? 8 : (v >= 10000000) ? 7 :
-      (v >= 1000000) ? 6 : (v >= 100000) ? 5 : (v >= 10000) ? 4 :
-      (v >= 1000) ? 3 : (v >= 100) ? 2 : (v >= 10) ? 1 : 0;
+/* static int*/
+/* digits_by_log10(unsigned long v) {*/
+/*   int r;*/
+/*   /* NOTE (sammynilla): Below are some notes from my reading:*/
+/*    * Conditions using integer division are slower than simple comparisons.*/
+/*    * This might seem a bit silly, but it's an obvious implementation.*/
+/*    */
+/*   r = (v >= 1000000000) ? 9 : (v >= 100000000) ? 8 : (v >= 10000000) ? 7 :*/
+/*       (v >= 1000000) ? 6 : (v >= 100000) ? 5 : (v >= 10000) ? 4 :*/
+/*       (v >= 1000) ? 3 : (v >= 100) ? 2 : (v >= 10) ? 1 : 0;*/
 
-  return r + 1;
-}
+/*   return r + 1;*/
+/* }*/
 
 static void 
 rpm_set(void *buf, long x, long y, unsigned long color) {
@@ -60,54 +60,37 @@ rpm_init(void *buf, long width, long height) {
   };
   enum { BASE_MOD = 1, MAX_DIGIT = 10, DIGIT_TO_ASCII = 48 };
   unsigned char *p = (unsigned char *)buf;
-  int digit_count;
-  int i;
 
   // MAGIC NUMBER
   *p++ = ASCII_P;
   *p++ = ASCII_6;
   *p++ = ASCII_NEW_LINE;
 
-  // WIDTH
+  // WIDTH,HEIGHT
   {
+    const char sep[2] = { ASCII_COMMA, ASCII_NEW_LINE };
     unsigned char ascii[MAX_DIGIT];
-    unsigned long mod = BASE_MOD;
-    unsigned long ret = 0;
     unsigned char *d;
-    digit_count = digits_by_log10(width);
-    {
-      unsigned long tuw = width;
-      for (i = 0; i < MAX_DIGIT - digit_count; ++i) { ascii[i] = ASCII_0; }
-      for (i = 0; i < digit_count; ++i) {
-        tuw -= ret;
+    int i, j;
+    for (i = 0; i < 2; ++i) {
+      unsigned long mod = BASE_MOD;
+      unsigned long ret = 0;
+      unsigned long s = i ? height : width;
+      const int digit_count =
+        (s >= 1000000000) ? 10 : (s >= 100000000) ? 9 : (s >= 10000000) ? 8 :
+        (s >= 1000000) ? 7 : (s >= 100000) ? 6 : (s >= 10000) ? 5 :
+        (s >= 1000) ? 4 : (s >= 100) ? 3 : (s >= 10) ? 2 : 1;
+      for (j = 0; j < MAX_DIGIT - digit_count; ++j) { ascii[j] = ASCII_0; }
+      for (j = 0; j < digit_count; ++j) {
+        s -= ret;
         mod *= 10;
-        ret = tuw % mod;
-        ascii[MAX_DIGIT-(i+1)] = (char)(ret / (mod * 0.1)) + DIGIT_TO_ASCII;
+        ret = s % mod;
+        ascii[MAX_DIGIT-(j+1)] = (char)(ret / (mod * 0.1)) + DIGIT_TO_ASCII;
       }
       d = ascii;
       while (*d) { *p++ = *d++; }
-      ret = 0;
+      *p++ = sep[i];
     }
-
-    *p++ = ASCII_COMMA;
-
-    // HEIGHT
-    digit_count = digits_by_log10(height);
-    mod = BASE_MOD;
-    {
-      unsigned long tuh = height;
-      for (i = 0; i < MAX_DIGIT - digit_count; ++i) { ascii[i] = ASCII_0; }
-      for (i = 0; i < digit_count; ++i) {
-        tuh -= ret;
-        mod *= 10;
-        ret = tuh % mod;
-        ascii[MAX_DIGIT-(i+1)] = (char)(ret / (mod * 0.1)) + DIGIT_TO_ASCII;
-      }
-      d = ascii;
-      while (*d) { *p++ = *d++; }
-    }
-
-    *p++ = ASCII_NEW_LINE;
   }
 
   // MAXVAL
@@ -117,4 +100,4 @@ rpm_init(void *buf, long width, long height) {
   *p++ = ASCII_NEW_LINE;
 }
 
-#endif /* RAW_PP_H */
+#endif /* RPM_H */
