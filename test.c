@@ -27,8 +27,8 @@ main(void) {
     long x, y;
     for (y = 0; y < HEIGHT; y++) {
       for (x = 0; x < WIDTH; x++) {
-        uint8_t r = (uint8_t)(255 * y / (float)HEIGHT);
-        uint8_t g = (uint8_t)(255 * x / (float)WIDTH);
+        uint8_t r = (uint8_t)(255 * y / HEIGHT);
+        uint8_t g = (uint8_t)(255 * x / WIDTH);
         uint8_t b = (uint8_t)(120);
         rpm_set(rpm, x, y, pack_colors(r, g, b));
       }
