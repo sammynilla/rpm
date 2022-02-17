@@ -19,7 +19,6 @@ pack_colors(const uint8_t r, const uint8_t g, const uint8_t b) {
 int
 main(void) {
   FILE *f;
-  long x, y;
   static char rpm[RPM_SIZE(WIDTH, HEIGHT)];
 
   rpm_init(rpm, WIDTH, HEIGHT);
@@ -28,16 +27,21 @@ main(void) {
   // TODO (sammynilla): Discover what the max size of PPM can be.
   assert(rpm_size(0, 1) == 0);
 
-  for (y = 0; y < HEIGHT; y++) {
-    for (x = 0; x < WIDTH; x++) {
-      uint8_t r = (uint8_t)(255 * y / (float)HEIGHT);
-      uint8_t g = (uint8_t)(255 * x / (float)WIDTH);
-      uint8_t b = 0;
-      rpm_set(rpm, x, y, pack_colors(r, g, b));
+  {
+    long x, y;
+    for (y = 0; y < HEIGHT; y++) {
+      for (x = 0; x < WIDTH; x++) {
+        uint8_t r = (uint8_t)(255 * y / (float)HEIGHT);
+        uint8_t g = (uint8_t)(255 * x / (float)WIDTH);
+        uint8_t b = (uint8_t)(120);
+        rpm_set(rpm, x, y, pack_colors(r, g, b));
+      }
     }
   }
 
   f = fopen("./out.ppm", "wb");
   fwrite(rpm, sizeof(rpm), 1, f);
   fclose(f);
+
+  return 0;
 }
