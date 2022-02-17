@@ -23,26 +23,17 @@ static void
 rpm_set(void *buf, long x, long y, unsigned long color) {
   enum { MAGIC_NUMBER = 3, SIZE_DATA = 11, MAX_VAL = 4 };
   enum { MAX_DIGIT = 10, DIGIT_TO_ASCII = 48 };
+  enum { DIGIT_0 = 47, DIGIT_9 = 57 };
   unsigned char *p = (unsigned char *)buf;
   unsigned long width = 0;
 
-  // NOTE (sammynilla): We could just pass width as an argument to avoid this...
+  p += MAGIC_NUMBER;
   // CALCULATE WIDTH
-  {
-    unsigned long mul = 1000000000;
-    int i;
-    p += MAGIC_NUMBER;
-    for (i = 0; i < MAX_DIGIT; ++i) {
-      if (*p != '0') {
-        int val = ((int)*p) - DIGIT_TO_ASCII;
-        val *= mul;
-        width += val;
-      }
-      mul = (unsigned long)(mul * 0.1);
-      *p++;
-    }
-    *p++;
+  for (; (((int)*p > DIGIT_0) && ((int)*p < DIGIT_9)); *p++) {
+    int val = ((int)*p) - DIGIT_TO_ASCII;
+    width = (width * 10) + val;
   }
+  *p++;
 
   p += SIZE_DATA + MAX_VAL;
   p += y * (width * 3) + x * 3;
