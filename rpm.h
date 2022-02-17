@@ -29,9 +29,9 @@ rpm_set(void *buf, long x, long y, unsigned long color) {
   // NOTE (sammynilla): We could just pass width as an argument to avoid this...
   // CALCULATE WIDTH
   {
-    p += MAGIC_NUMBER;
     unsigned long mul = 1000000000;
     int i;
+    p += MAGIC_NUMBER;
     for (i = 0; i < MAX_DIGIT; ++i) {
       if (*p != '0') {
         int val = ((int)*p) - DIGIT_TO_ASCII;
