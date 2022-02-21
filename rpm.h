@@ -69,7 +69,7 @@ rpm_init(void *buf, long width, long height) {
   /* WIDTH,HEIGHT */
   {
     const uchar separator[2] = { ASCII_COMMA, ASCII_NEW_LINE };
-    uchar ascii[MAX_DIGIT];
+    uchar ascii[MAX_DIGIT+1] = {0};
     uchar *d;
     int i, j;
     for (i = 0; i < 2; ++i) {
