@@ -22,7 +22,7 @@ main(void) {
   uc_rpm_init(rpm, WIDTH, HEIGHT);
 
   /* TODO (sammynilla): Discover what the max size of PPM can be. */
-  assert(rpm_size(0, 1) == 0);
+  assert(uc_rpm_size(0, 1) == 0);
 
   {
     long x, y;
